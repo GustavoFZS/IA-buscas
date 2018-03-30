@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -119,20 +119,20 @@ def breadthFirstSearch(problem):
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat)
 
-    # teste = 0
+    teste = 0
 
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
 
-        # testeBk = teste
-        # teste = 0
-        # for x in atualNo.coordenadas[1]:
-        #     teste += x
-        #
-        # if teste > testeBk:
-        #     grafoBusca = util.Queue()
-        #     visitados = []
+        testeBk = teste
+        teste = 0
+        for x in atualNo.coordenadas[1]:
+            teste += x
+
+        if teste > testeBk:
+            grafoBusca = util.Queue()
+            visitados = []
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
         visitados.append(atualNo.coordenadas)
@@ -241,9 +241,9 @@ def learningRealTimeAStar(problem, heuristic=nullHeuristic):
     util.raiseNotDefined()
 
     # MAXTRIALS = ...
-    
 
-# Abbreviations 
+
+# Abbreviations
 # *** DO NOT CHANGE THESE ***
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
