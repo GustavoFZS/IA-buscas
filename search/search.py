@@ -125,20 +125,25 @@ def breadthFirstSearch(problem):
 
         atualNo = grafoBusca.pop()
 
-        testeBk = teste
-        teste = 0
-        for x in atualNo.coordenadas[1]:
-            teste += x
-
-        if teste > testeBk:
-            grafoBusca = util.Queue()
-            visitados = []
+        # testeBk = teste
+        # teste = 0
+        # for x in atualNo.coordenadas[1]:
+        #     teste += x
+        #
+        # if teste > testeBk:
+        #     grafoBusca = util.Queue()
+        #     visitados = []
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
         visitados.append(atualNo.coordenadas)
 
         if problem.isGoalState(atualNo.coordenadas):
-            return formataSolucao(atualNo)
+
+            if problem.goal in problem._visitedlist:
+                return formataSolucao(atualNo)
+            else:
+                grafoBusca = util.Queue()
+                visitados = []
 
         for caminho in sucessores:
 
@@ -225,9 +230,12 @@ def formataSolucao(inicio):
     import collections
 
     solucao = collections.deque()
-    solucao.appendleft(inicio.direcao)
-
     atualNo = inicio
+
+    if atualNo.direcao == 'Fim':
+        return solucao
+
+    solucao.appendleft(inicio.direcao)
 
     while(atualNo.anterior.direcao != 'Fim'):
         solucao.appendleft(atualNo.anterior.direcao)

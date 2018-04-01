@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -217,7 +217,7 @@ class PositionSearchProblem(search.SearchProblem):
         include an illegal move, return 999999.
         """
         if actions == None: return 999999
-        x, y = self.getStartState()
+        x,y= self.getStartState()
         cost = 0
         for action in actions:
             # Check figure out the next state and see whether its' legal
@@ -268,8 +268,6 @@ class CornersProblem(search.SearchProblem):
 
     You must select a suitable state space and successor function
     """
-    cornersFound = 0
-    cornerFound = [False, False, False, False]
 
     def __init__(self, startingGameState):
         """
@@ -279,55 +277,41 @@ class CornersProblem(search.SearchProblem):
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        self.goal = [(1,1), (1,top), (right, 1), (right, top)]
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
-
         # Please add any code here which you would like to use
         # in initializing the problem
-        "*** YOUR CODE HERE ***"
+        self.cantosVisitados = []
 
-        self._visited, self._visitedlist = {}, []
-        corner_state = [0, 0, 0, 0]
-        # check if start position is in any corner
-        if self.startingPosition in self.corners:
-            idx = self.corners.index(self.startingPosition)
-            corner_state[idx] = 1
-        self.startState = (self.startingPosition, tuple(corner_state))
+        # For display purposes
+        self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        return self.startState
-        # util.raiseNotDefined()
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        isGoal = not (0 in state[1])
+        isGoal = (state in self.goal)
 
         # For display purposes only
         if isGoal:
-            self._visitedlist.append(state[0])
+            self.goal.remove(state)
+            self._visitedlist.append(state)
             import __main__
             if '_display' in dir(__main__):
-                if 'drawExpandedCells' in dir(__main__._display):  # @UndefinedVariable
-                    __main__._display.drawExpandedCells(self._visitedlist)  # @UndefinedVariable
+                if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
+                    __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
 
         return isGoal
-
-        # for i in range(0, 4):
-        #     if state == self.corners[i] and not self.cornerFound[i]:
-        #         self.cornerFound[i] = True
-        #         self.cornersFound += 1
-        #
-        # return self.cornersFound == 4
 
     def getSuccessors(self, state):
         """
@@ -342,54 +326,19 @@ class CornersProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            # Add a successor state to the successor list if the action is legal
-            # Here's a code snippet for figuring out whether a new position hits a wall:
-            #   x,y = currentPosition
-            #   dx, dy = Actions.directionToVector(action)
-            #   nextx, nexty = int(x + dx), int(y + dy)
-            #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
-            x, y = state[0]
+            x,y = state
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            hitsWall = self.walls[nextx][nexty]
-            if not hitsWall:
+            if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
                 cost = 1
-
-                from copy import deepcopy
-                if nextState in self.corners:
-                    index = self.corners.index(nextState)
-                    corner_state = list(deepcopy(state[1]))
-                    corner_state[index] = 1
-                else:
-                    corner_state = list(deepcopy(state[1]))
-
-                successors.append(((nextState, tuple(corner_state)), action, cost))
+                successors.append( ( nextState, action, 1) )
 
         # Bookkeeping for display purposes
+        self._expanded += 1 # DO NOT CHANGE
         if state not in self._visited:
             self._visited[state] = True
-            self._visitedlist.append(state[0])
-
-        self._expanded += 1
-        return successors
-
-
-
-
-        # successors = []
-        # for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-        #     x, y = state
-        #     dx, dy = Actions.directionToVector(action)
-        #     nextx, nexty = int(x + dx), int(y + dy)
-        #     if not self.walls[nextx][nexty]:
-        #         nextState = (nextx, nexty)
-        #         successors.append((nextState, action, 1))
-
-        # Bookkeeping for display purposes
-        # self._expanded += 1  # DO NOT CHANGE
+            self._visitedlist.append(state)
 
         return successors
 
