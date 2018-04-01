@@ -119,20 +119,9 @@ def breadthFirstSearch(problem):
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat)
 
-    teste = 0
-
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
-
-        # testeBk = teste
-        # teste = 0
-        # for x in atualNo.coordenadas[1]:
-        #     teste += x
-        #
-        # if teste > testeBk:
-        #     grafoBusca = util.Queue()
-        #     visitados = []
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
         visitados.append(atualNo.coordenadas)
@@ -212,7 +201,12 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         visitados.append(atualNo.coordenadas)
 
         if problem.isGoalState(atualNo.coordenadas):
-            return formataSolucao(atualNo)
+
+            if problem.goal in problem._visitedlist or set(problem.goal).issubset(set(problem._visitedlist)):
+                return formataSolucao(atualNo)
+            else:
+                grafoBusca = util.PriorityQueue()
+                visitados = []
 
         for caminho in sucessores:
 

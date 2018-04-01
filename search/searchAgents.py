@@ -278,6 +278,7 @@ class CornersProblem(search.SearchProblem):
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         self.goal = [(1,1), (1,top), (right, 1), (right, top)]
+        self.goalRest = [(1, 1), (1, top), (right, 1), (right, top)]
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -300,11 +301,11 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        isGoal = (state in self.goal)
+        isGoal = (state in self.goalRest)
 
         # For display purposes only
         if isGoal:
-            self.goal.remove(state)
+            self.goalRest.remove(state)
             self._visitedlist.append(state)
             import __main__
             if '_display' in dir(__main__):
@@ -371,9 +372,21 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    ObjetivoProx = -1
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    for objetivo in corners:
+
+        x1 = state[0]
+        x2 = objetivo[0]
+        y1 = state[1]
+        y2 = objetivo[1]
+
+        distancia = abs(x1 - x2) + abs(y1 - y2)
+
+        if ObjetivoProx == -1 or distancia < ObjetivoProx:
+            ObjetivoProx = distancia
+
+    return ObjetivoProx
 
 
 class AStarCornersAgent(SearchAgent):
