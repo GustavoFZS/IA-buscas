@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -278,7 +278,6 @@ class CornersProblem(search.SearchProblem):
         top, right = self.walls.height-2, self.walls.width-2
         self.corners = ((1,1), (1,top), (right, 1), (right, top))
         self.goal = [(1,1), (1,top), (right, 1), (right, top)]
-        self.goalRest = [(1, 1), (1, top), (right, 1), (right, top)]
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -301,11 +300,11 @@ class CornersProblem(search.SearchProblem):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        isGoal = (state in self.goalRest)
+        isGoal = (state in self.goal)
 
         # For display purposes only
         if isGoal:
-            self.goalRest.remove(state)
+            self.goal.remove(state)
             self._visitedlist.append(state)
             import __main__
             if '_display' in dir(__main__):
@@ -370,11 +369,10 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = problem.corners # These are the corner coordinates
-    walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    goal = problem.goal # These are the corner coordinates
     ObjetivoProx = -1
 
-    for objetivo in corners:
+    for objetivo in goal:
 
         x1 = state[0]
         x2 = objetivo[0]

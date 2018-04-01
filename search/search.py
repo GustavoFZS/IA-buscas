@@ -63,7 +63,7 @@ class SearchProblem:
 
 class Vertice(object):
 
-    def __init__(self, elemento, peso):
+    def __init__(self, elemento, peso=0):
         self.coordenadas = elemento[0]
         self.direcao = elemento[1]
         self.peso = peso
@@ -93,17 +93,17 @@ def depthFirstSearch(problem):
 
         atualNo = grafoBusca.pop()
 
-        sucessores = problem.getSuccessors(atualNo.coordenadas)
-        visitados.append(atualNo.coordenadas)
-
         if problem.isGoalState(atualNo.coordenadas):
             return formataSolucao(atualNo)
 
+        sucessores = problem.getSuccessors(atualNo.coordenadas)
+
         for caminho in sucessores:
 
-            novoNo = Vertice(caminho, atualNo.peso + 1)
+            novoNo = Vertice(caminho)
 
             if novoNo.coordenadas not in visitados:
+                visitados.append(novoNo.coordenadas)
                 grafoBusca.push(novoNo)
                 novoNo.anterior = atualNo
 
@@ -113,32 +113,36 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the node that has the lowest combined cost and heuristic first."""
 
+    import time
+
     grafoBusca = util.Queue()
     visitados = []
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat)
 
+    teste = 0
+
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
 
-        sucessores = problem.getSuccessors(atualNo.coordenadas)
-        visitados.append(atualNo.coordenadas)
-
         if problem.isGoalState(atualNo.coordenadas):
 
-            if problem.goal in problem._visitedlist:
+            if problem.goal in problem._visitedlist or set(problem.goal).issubset(set(problem._visitedlist)):
                 return formataSolucao(atualNo)
             else:
                 grafoBusca = util.Queue()
                 visitados = []
 
+        sucessores = problem.getSuccessors(atualNo.coordenadas)
+
         for caminho in sucessores:
 
-            novoNo = Vertice(caminho, atualNo.peso + 1)
+            novoNo = Vertice(caminho)
 
             if novoNo.coordenadas not in visitados:
+                visitados.append(novoNo.coordenadas)
                 grafoBusca.push(novoNo)
                 novoNo.anterior = atualNo
 
@@ -159,17 +163,17 @@ def uniformCostSearch(problem):
 
         atualNo = grafoBusca.pop()
 
-        sucessores = problem.getSuccessors(atualNo.coordenadas)
-        visitados.append(atualNo.coordenadas)
-
         if problem.isGoalState(atualNo.coordenadas):
             return formataSolucao(atualNo)
+
+        sucessores = problem.getSuccessors(atualNo.coordenadas)
 
         for caminho in sucessores:
 
             novoNo = Vertice(caminho, atualNo.peso + 1)
 
             if novoNo.coordenadas not in visitados:
+                visitados.append(novoNo.coordenadas)
                 grafoBusca.push(novoNo, novoNo.peso)
                 novoNo.anterior = atualNo
 
@@ -197,8 +201,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
-        sucessores = problem.getSuccessors(atualNo.coordenadas)
-        visitados.append(atualNo.coordenadas)
 
         if problem.isGoalState(atualNo.coordenadas):
 
@@ -208,11 +210,14 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 grafoBusca = util.PriorityQueue()
                 visitados = []
 
+        sucessores = problem.getSuccessors(atualNo.coordenadas)
+
         for caminho in sucessores:
 
-            novoNo = Vertice(caminho, atualNo.peso + 1)
+            novoNo = Vertice(caminho)
 
             if novoNo.coordenadas not in visitados:
+                visitados.append(novoNo.coordenadas)
                 grafoBusca.push(novoNo, heuristic(novoNo.coordenadas, problem))
                 novoNo.anterior = atualNo
 
@@ -231,8 +236,11 @@ def formataSolucao(inicio):
 
     solucao.appendleft(inicio.direcao)
 
+    teste = 0
+
     while(atualNo.anterior.direcao != 'Fim'):
         solucao.appendleft(atualNo.anterior.direcao)
+        teste += 1
         atualNo = atualNo.anterior
     return solucao
 
