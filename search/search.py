@@ -67,6 +67,10 @@ class Vertice(object):
         self.coordenadas = elemento[0]
         self.direcao = elemento[1]
         self.peso = peso
+        self.anterior = 0
+
+    def __eq__(self, other):
+        return self.coordenadas == other.coordenadas
 
 def tinyMazeSearch(problem):
     """
@@ -79,15 +83,14 @@ def tinyMazeSearch(problem):
     return  [s, s, w, s, w, w, s, w]
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
-    """
+    """Search the node that has the lowest combined cost and heuristic first."""
 
     grafoBusca = util.Stack()
     visitados = []
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat)
+    visitados.append(inicialFormat.coordenadas)
 
     while not grafoBusca.isEmpty():
 
@@ -97,13 +100,13 @@ def depthFirstSearch(problem):
             return formataSolucao(atualNo)
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
+        visitados.append(atualNo.coordenadas)
 
         for caminho in sucessores:
 
             novoNo = Vertice(caminho)
 
             if novoNo.coordenadas not in visitados:
-                visitados.append(novoNo.coordenadas)
                 grafoBusca.push(novoNo)
                 novoNo.anterior = atualNo
 
@@ -113,15 +116,12 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the node that has the lowest combined cost and heuristic first."""
 
-    import time
-
     grafoBusca = util.Queue()
     visitados = []
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat)
-
-    teste = 0
+    visitados.append(inicialFormat.coordenadas)
 
     while not grafoBusca.isEmpty():
 
@@ -129,11 +129,9 @@ def breadthFirstSearch(problem):
 
         if problem.isGoalState(atualNo.coordenadas):
 
-            if problem.goal in problem._visitedlist or set(problem.goal).issubset(set(problem._visitedlist)):
-                return formataSolucao(atualNo)
-            else:
-                grafoBusca = util.Queue()
-                visitados = []
+            grafoBusca = util.Queue()
+            visitados = []
+            return formataSolucao(atualNo)
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
 
@@ -153,8 +151,8 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
 
 
-    grafoBusca = util.PriorityQueue();
-    visitados = []
+    grafoBusca = util.PriorityQueue()
+    visitados = {}
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat, 0)
@@ -162,6 +160,7 @@ def uniformCostSearch(problem):
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
+        visitados[atualNo.coordenadas] = atualNo
 
         if problem.isGoalState(atualNo.coordenadas):
             return formataSolucao(atualNo)
@@ -170,10 +169,10 @@ def uniformCostSearch(problem):
 
         for caminho in sucessores:
 
-            novoNo = Vertice(caminho, atualNo.peso + 1)
+            novoNo = Vertice(caminho, caminho[2] + atualNo.peso)
 
-            if novoNo.coordenadas not in visitados:
-                visitados.append(novoNo.coordenadas)
+            if (not visitados.has_key(novoNo.coordenadas)) or visitados[novoNo.coordenadas].peso > novoNo.peso:
+                visitados[novoNo.coordenadas] = novoNo
                 grafoBusca.push(novoNo, novoNo.peso)
                 novoNo.anterior = atualNo
 
@@ -188,12 +187,10 @@ def nullHeuristic(state, problem=None):
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """
-    Search the node that has the lowest combined cost and heuristic first.
-    """
+    """Search the node that has the lowest combined cost and heuristic first."""
 
     grafoBusca = util.PriorityQueue()
-    visitados = []
+    visitados = {}
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat, 0)
@@ -201,27 +198,23 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
+        visitados[atualNo.coordenadas] = atualNo
 
         if problem.isGoalState(atualNo.coordenadas):
-
-            if problem.goal in problem._visitedlist or set(problem.goal).issubset(set(problem._visitedlist)):
-                return formataSolucao(atualNo)
-            else:
-                grafoBusca = util.PriorityQueue()
-                visitados = []
+            return formataSolucao(atualNo)
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
 
         for caminho in sucessores:
 
-            novoNo = Vertice(caminho)
+            novoNo = Vertice(caminho, caminho[2] + atualNo.peso)
 
-            if novoNo.coordenadas not in visitados:
-                visitados.append(novoNo.coordenadas)
-                grafoBusca.push(novoNo, heuristic(novoNo.coordenadas, problem))
+            if (not visitados.has_key(novoNo.coordenadas)) or visitados[novoNo.coordenadas].peso > novoNo.peso:
+                visitados[novoNo.coordenadas] = novoNo
+                grafoBusca.push(novoNo, novoNo.peso + heuristic(novoNo.coordenadas, problem))
                 novoNo.anterior = atualNo
 
-    return -1
+    return formataSolucao(atualNo)
 
 
 def formataSolucao(inicio):
@@ -242,7 +235,7 @@ def formataSolucao(inicio):
         solucao.appendleft(atualNo.anterior.direcao)
         teste += 1
         atualNo = atualNo.anterior
-    return solucao
+    return list(solucao)
 
 
 def learningRealTimeAStar(problem, heuristic=nullHeuristic):
