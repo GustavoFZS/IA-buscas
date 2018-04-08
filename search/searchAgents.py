@@ -303,12 +303,12 @@ class CornersProblem(search.SearchProblem):
 
         # For display purposes only
         if isGoal:
-            self.goal.remove(state)
-            self._visitedlist.append(state)
-            import __main__
-            if '_display' in dir(__main__):
-                if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
-                    __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
+                isGoal = 'X'
+                self._visitedlist.append(state)
+                import __main__
+                if '_display' in dir(__main__):
+                    if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
+                        __main__._display.drawExpandedCells(self._visitedlist) #@UndefinedVariable
 
         return isGoal
 
@@ -373,15 +373,17 @@ def cornersHeuristic(state, problem):
 
     for objetivo in goal:
 
-        x1 = state[0]
-        x2 = objetivo[0]
-        y1 = state[1]
-        y2 = objetivo[1]
+        if objetivo not in problem._visitedlist:
 
-        distancia = abs(x1 - x2) + abs(y1 - y2)
+            x1 = state[0]
+            x2 = objetivo[0]
+            y1 = state[1]
+            y2 = objetivo[1]
 
-        if ObjetivoProx == -1 or distancia < ObjetivoProx:
-            ObjetivoProx = distancia
+            distancia = abs(x1 - x2) + abs(y1 - y2)
+
+            if ObjetivoProx == -1 or distancia < ObjetivoProx:
+                ObjetivoProx = distancia
 
     return ObjetivoProx
 

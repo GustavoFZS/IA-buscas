@@ -18,6 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
+from sets import Set
 
 class SearchProblem:
     """
@@ -68,9 +69,10 @@ class Vertice(object):
         self.direcao = elemento[1]
         self.peso = peso
         self.anterior = 0
+        self.objetivosEncontrados = Set([])
 
     def __eq__(self, other):
-        return self.coordenadas == other.coordenadas
+        return self.coordenadas == other.coordenadas and len(self.objetivosEncontrados.difference(other.objetivosEncontrados)) == 0
 
 def tinyMazeSearch(problem):
     """
@@ -120,29 +122,39 @@ def breadthFirstSearch(problem):
     visitados = []
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
+    inicialFormat.anterior = Vertice([problem.getStartState(), 'Aux'], 0)
+
     grafoBusca.push(inicialFormat)
-    visitados.append(inicialFormat.coordenadas)
+    visitados.append(inicialFormat)
 
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
 
-        if problem.isGoalState(atualNo.coordenadas):
+        aux = problem.isGoalState(atualNo.coordenadas)
 
-            grafoBusca = util.Queue()
-            visitados = []
-            return formataSolucao(atualNo)
+        if aux:
+            if aux == 'X':
+                atualNo.objetivosEncontrados.add(atualNo.coordenadas)
+                visitados.append(atualNo)
+                if len(atualNo.objetivosEncontrados) == 4:
+                    return formataSolucao(atualNo)
+            else:
+                return formataSolucao(atualNo)
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
 
         for caminho in sucessores:
 
             novoNo = Vertice(caminho)
+            novoNo.anterior = atualNo
+            novoNo.objetivosEncontrados.update(atualNo.objetivosEncontrados)
 
-            if novoNo.coordenadas not in visitados:
-                visitados.append(novoNo.coordenadas)
+            if not novoNo in visitados:
+                visitados.append(novoNo)
                 grafoBusca.push(novoNo)
-                novoNo.anterior = atualNo
+            else:
+                novoNo = Vertice(caminho)
 
     return formataSolucao(atualNo)
 
@@ -190,29 +202,40 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
 
     grafoBusca = util.PriorityQueue()
-    visitados = {}
+    visitados = []
+    objetivosVisitados = []
 
     inicialFormat = Vertice([problem.getStartState(), 'Fim'], 0)
     grafoBusca.push(inicialFormat, 0)
+    visitados.append(inicialFormat)
 
     while not grafoBusca.isEmpty():
 
         atualNo = grafoBusca.pop()
-        visitados[atualNo.coordenadas] = atualNo
 
-        if problem.isGoalState(atualNo.coordenadas):
-            return formataSolucao(atualNo)
+        aux = problem.isGoalState(atualNo.coordenadas)
+
+        if aux:
+            if aux == 'X':
+                grafoBusca = util.PriorityQueue()
+                visitados = []
+                objetivosVisitados.append(atualNo)
+                visitados.extend(objetivosVisitados)
+                if len(objetivosVisitados) == 4:
+                    return formataSolucao(atualNo)
+            else:
+                return formataSolucao(atualNo)
 
         sucessores = problem.getSuccessors(atualNo.coordenadas)
 
         for caminho in sucessores:
 
             novoNo = Vertice(caminho, caminho[2] + atualNo.peso)
+            novoNo.anterior = atualNo
 
-            if (not visitados.has_key(novoNo.coordenadas)) or visitados[novoNo.coordenadas].peso > novoNo.peso:
-                visitados[novoNo.coordenadas] = novoNo
+            if (novoNo not in visitados) or ((visitados[visitados.index(novoNo)].peso + heuristic(visitados[visitados.index(novoNo)].coordenadas, problem)) > novoNo.peso + heuristic(novoNo.coordenadas, problem)):
+                visitados.append(novoNo)
                 grafoBusca.push(novoNo, novoNo.peso + heuristic(novoNo.coordenadas, problem))
-                novoNo.anterior = atualNo
 
     return formataSolucao(atualNo)
 
